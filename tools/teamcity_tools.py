@@ -8,11 +8,11 @@ from pydantic import BaseModel, Field, field_validator
 from dotenv import load_dotenv
 load_dotenv(override=True)
 
-from operations.team_city_operations import TeamcityOperations
+from operations.teamcity_operations import TeamcityOperations
 
 teamcity_Operations=TeamcityOperations()
 
-class GithubTools():
+class TeamCityTools():
     
     class TeamCityGetProjectsTool(BaseTool):
         name: str = "TeamCityGetProjectsTool"

@@ -86,28 +86,28 @@ services:
       - MYSQL_USER=ibm_ucd
       - MYSQL_PASSWORD=your-mysql-password
 
-  harness:
-    image: harness/harness-ce:latest
-    container_name: langgraph_harness
-    ports:
-      - "1338:1338"
-    environment:
-      - HARNESSEVENTS_HOST=localhost
-      - HARNESSEVENTS_PORT=1338
-      - HARNESSEVENTS_DB_HOST=postgres
-      - HARNESSEVENTS_DB_NAME=harness
-      - HARNESSEVENTS_DB_USER=harness
-      - HARNESSEVENTS_DB_PASSWORD=harness
-    volumes:
-      - harness_data:/harness/data
-    depends_on:
-      - postgres
+  # harness:
+  #   image: harness/harness-ce:latest
+  #   container_name: langgraph_harness
+  #   ports:
+  #     - "1338:1338"
+  #   environment:
+  #     - HARNESSEVENTS_HOST=localhost
+  #     - HARNESSEVENTS_PORT=1338
+  #     - HARNESSEVENTS_DB_HOST=postgres
+  #     - HARNESSEVENTS_DB_NAME=harness
+  #     - HARNESSEVENTS_DB_USER=harness
+  #     - HARNESSEVENTS_DB_PASSWORD=harness
+  #   volumes:
+  #     - harness_data:/harness/data
+  #   depends_on:
+  #     - postgres
 volumes:
   postgres_data:
   teamcity_data:
   teamcity_logs:
   tekton_data:
-  harness_data:
+  # harness_data:
   udeploy_data:
 
 networks:

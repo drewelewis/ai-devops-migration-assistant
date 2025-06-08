@@ -15,14 +15,12 @@ from langchain_core.utils.function_calling import format_tool_to_openai_function
 
 from langchain_openai import AzureChatOpenAI
 from IPython.display import Image, display
-from langchain_community.tools.tavily_search import TavilySearchResults
 
 from utils.langgraph_utils import save_graph
 from dotenv import load_dotenv
 
-
-from tools.github_tools import GithubTools
 from tools.tekton_tools import TektonTools
+from tools.teamcity_tools import TeamCityTools    
 
 load_dotenv(override=True)
 current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -55,11 +53,10 @@ llm  = AzureChatOpenAI(
 )
 
 
-github_tools = GithubTools()
-teamcity_tools = github_tools.tools
+teamcity_tools = TeamCityTools()
 tekton_tools = TektonTools()
 
-tools= github_tools.tools + elasticsearch_tools.tools 
+tools= teamcity_tools.tools + tekton_tools.tools 
 llm_with_tools = llm.bind_tools(tools)
 
 # Define Nodes
