@@ -48,7 +48,6 @@ llm  = AzureChatOpenAI(
     azure_endpoint=os.getenv('OPENAI_API_ENDPOINT'),
     azure_deployment=os.getenv('OPENAI_API_MODEL_DEPLOYMENT_NAME'),
     api_version=os.getenv('OPENAI_API_VERSION'),
-    temperature=0,
     streaming=True
 )
 
