@@ -77,6 +77,30 @@ services:
       - HTTPS_PORT=8443
     depends_on:
       - mysql
+    networks:
+      - udeploy_network
+
+  udeploy-agent:
+    image: openjdk:8u111-jre
+    container_name: langgraph_udeploy_agent1
+    # enable ssh access to the container
+    ports:
+      - "7918:7918"
+    environment:
+      - ADMIN_PASSWORD=password
+      - UDEPLOY_SERVER_HOSTNAME=udeploy
+      - UDEPLOY_SERVER_PORT=8443
+
+    depends_on:
+      - udeploy
+    networks:
+      - udeploy_network
+    volumes:
+      - udeploy_data:/opt/ibm-ucd/agent
+    # run a command to kep the container alive
+    command: tail -f /dev/null
+    
+
   mysql:
     image: mysql:5.6
     container_name: langgraph_udeploy_mysql
@@ -87,6 +111,8 @@ services:
       - MYSQL_DATABASE=ucd
       - MYSQL_USER=ucd
       - MYSQL_PASSWORD=ucd
+    networks:
+      - udeploy_network  
 
   harness:
     image: harness/harness:latest
@@ -113,3 +139,5 @@ volumes:
 
 networks:
   teamcity_network:
+  udeploy_network:
+
