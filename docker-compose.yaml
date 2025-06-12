@@ -1,18 +1,5 @@
 services:
 
-  postgres:
-    image: postgres:17.5
-    container_name: langgraph_postgres
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      PGDATA: /var/lib/postgresql/data/pgdata
-
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
   adminer:
     image: adminer
     container_name: langgraph_adminer
@@ -54,8 +41,6 @@ services:
     networks:
       - teamcity_network
 
-
-
   # tekton:
   # You need to have Openshift local installed to run this service successfully.
   # https://zxtech.wordpress.com/2024/05/12/configuring-openshift-local/
@@ -72,7 +57,7 @@ services:
       - DB_NAME=ucd
       - DB_USER=ucd
       - DB_PASSWORD=ucd
-      - ADMIN_PASSWORD=password # Optional
+      - ADMIN_PASSWORD=password
       - DEPLOY_SERVER_HOSTNAME=localhost
       - HTTPS_PORT=8443
     depends_on:
@@ -82,8 +67,7 @@ services:
 
   tomcat:
     image: tomcat:9.0.106-jre8-temurin-jammy
-    container_name: langgraph_tomcat
-    # enable ssh access to the container
+    container_name: langgraph_tomcat    
     ports:
       - "7918:7918"
       - "8888:8080"
@@ -91,7 +75,6 @@ services:
       - CATALINA_OPTS=-Xmx2g -XX:ReservedCodeCacheSize=512m
       - UDEPLOY_SERVER_HOSTNAME=udeploy
       - UDEPLOY_SERVER_PORT=8443
-
     depends_on:
       - udeploy
     networks:
@@ -101,7 +84,6 @@ services:
       - tomcat_data:/usr/local/tomcat/webapps
       - ./containers/tomcat/ibm-ucd-agent.zip:/ibm-ucd-agent.zip
       - ./containers/tomcat/start-agent.sh:/opt/ibm-ucd/start-agent.sh
-
     command: |
       catalina.sh run logging.level=INF && /opt/ibm-ucd/start-agent.sh 
 
@@ -120,27 +102,44 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
 
+  postgres:
+    image: postgres:17.5
+    container_name: langgraph_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: harness
+      POSTGRES_USER: harness
+      POSTGRES_PASSWORD: harness
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - harness_network
+
   harness:
     image: harness/harness:latest
     container_name: langgraph_harness
-    ports:
-      - "1338:1338"
     environment:
-      - HARNESS_DB_HOST=postgres
-      - HARNESS_DB_PORT=5432
-      - HARNESS_DB_NAME=harness
-      - HARNESS_DB_USER=harness
-      - HARNESS_DB_PASSWORD=harness
+      GITNESS_DATABASE_DRIVER: postgres
+      GITNESS_DATABASE_DATASOURCE: host=postgres port=5432 sslmode=disable dbname=harness user=harness password=harness
+    ports:
+      - "3000:3000"
+      - "22:22"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/harness:/data
+    networks:
+      - harness_network
     depends_on:
       - postgres
-
 
 volumes:
   postgres_data:
   teamcity_data:
   teamcity_logs:
   tekton_data:
-  # harness_data:
+  harness_data:
   udeploy_data:
   tomcat_data:
   mysql_data:
@@ -148,4 +147,3 @@ volumes:
 networks:
   teamcity_network:
   udeploy_network:
-
