@@ -80,14 +80,15 @@ services:
     networks:
       - udeploy_network
 
-  udeploy-agent:
-    image: openjdk:8u111-jre
-    container_name: langgraph_udeploy_agent1
+  tomcat:
+    image: tomcat:9.0.106-jre8-temurin-jammy
+    container_name: langgraph_tomcat
     # enable ssh access to the container
     ports:
       - "7918:7918"
+      - "8888:8080"
     environment:
-      - ADMIN_PASSWORD=password
+      - CATALINA_OPTS=-Xmx2g -XX:ReservedCodeCacheSize=512m
       - UDEPLOY_SERVER_HOSTNAME=udeploy
       - UDEPLOY_SERVER_PORT=8443
 
@@ -97,9 +98,12 @@ services:
       - udeploy_network
     volumes:
       - udeploy_data:/opt/ibm-ucd/agent
-    # run a command to kep the container alive
-    command: tail -f /dev/null
-    
+      - tomcat_data:/usr/local/tomcat/webapps
+      - ./containers/tomcat/ibm-ucd-agent.zip:/ibm-ucd-agent.zip
+      - ./containers/tomcat/start-agent.sh:/opt/ibm-ucd/start-agent.sh
+
+    command: |
+      catalina.sh run logging.level=INF && /opt/ibm-ucd/start-agent.sh 
 
   mysql:
     image: mysql:5.6
@@ -112,7 +116,9 @@ services:
       - MYSQL_USER=ucd
       - MYSQL_PASSWORD=ucd
     networks:
-      - udeploy_network  
+      - udeploy_network
+    volumes:
+      - mysql_data:/var/lib/mysql
 
   harness:
     image: harness/harness:latest
@@ -136,6 +142,8 @@ volumes:
   tekton_data:
   # harness_data:
   udeploy_data:
+  tomcat_data:
+  mysql_data:
 
 networks:
   teamcity_network:

@@ -1,0 +1,10 @@
+[Unit]
+Description=UCD Agent Startup Script
+After=network.target  # Ensures script runs after network is up
+
+[Service]
+ExecStart=/path/to/your_script.sh  # Replace with the actual path to your script
+Type=simple  # Simple type service
+
+[Install]
+WantedBy=default.target  # Starts the script during the default startup process
