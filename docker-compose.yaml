@@ -147,3 +147,4 @@ volumes:
 networks:
   teamcity_network:
   udeploy_network:
+  harness_network:
