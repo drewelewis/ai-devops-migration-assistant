@@ -85,7 +85,7 @@ services:
       - ./containers/tomcat/ibm-ucd-agent.zip:/ibm-ucd-agent.zip
       - ./containers/tomcat/start-agent.sh:/opt/ibm-ucd/start-agent.sh
     command: |
-      catalina.sh run logging.level=INF && /opt/ibm-ucd/start-agent.sh 
+      catalina.sh run logging.level=INFO && /opt/ibm-ucd/start-agent.sh 
 
   mysql:
     image: mysql:5.6
@@ -114,8 +114,6 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - harness_network
 
   harness:
     image: harness/harness:latest
@@ -129,8 +127,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp/harness:/data
-    networks:
-      - harness_network
     depends_on:
       - postgres
 
@@ -147,4 +143,3 @@ volumes:
 networks:
   teamcity_network:
   udeploy_network:
-  harness_network:
