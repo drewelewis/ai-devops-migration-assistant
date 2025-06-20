@@ -1,0 +1,104 @@
+# This is a sample CI pipeline for a Python application using Harness.
+# https://github.com/harness-community/python-pipeline-samples/blob/main/README.md
+pipeline:
+  name: CI-Python-Example
+  identifier: CIPythonExample
+  projectIdentifier: default_project
+  orgIdentifier: default
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: pythonsampleconnector
+        build: <+input>
+  stages:
+  - stage:
+      name: build
+      identifier: build_and_publish
+      description: ""
+      type: CI
+      spec:
+        cloneCodebase: true
+        caching:
+          enabled: true
+          override: true
+          paths: []
+        buildIntelligence:
+          enabled: true
+        platform:
+          os: Linux
+          arch: Amd64
+        runtime:
+          type: Docker
+          spec: {}
+        execution:
+          steps:
+          - step:
+              type: Run
+              name: Code compile
+              identifier: Code_compile
+              spec:
+                connectorRef: dockerconnector
+                image: python:3.10.6-alpine
+                shell: Sh
+                command: python -m compileall ./
+          - step:
+              type: Run
+              name: Create Docker File
+              identifier: Create_Docker_File
+              spec:
+                connectorRef: dockerconnector
+                image: alpine
+                shell: Sh
+                command: |-
+                  touch pythondockerfile
+                  cat > pythondockerfile <<- EOM
+                  FROM python:3.10.6-alpine
+                  WORKDIR /python-pipeline-samples
+                  ADD . /python-pipeline-samples
+                  RUN pip install -r requirements.txt
+                  CMD ["python" , "app.py"]
+                  EOM
+                  cat pythondockerfile
+          - step:
+              type: BuildAndPushDockerRegistry
+              name: build and push image to docker registry
+              identifier: build_and_push_image_to_docker_registry
+              spec:
+                connectorRef: dockerconnector
+                repo: sxavramidis/python-pipeline-samples
+                tags:
+                - latest
+                dockerfile: pythondockerfile
+  - stage:
+      name: run
+      identifier: run_python_server
+      description: ""
+      type: CI
+      spec:
+        cloneCodebase: true
+        caching:
+          enabled: true
+          override: true
+          paths: []
+        buildIntelligence:
+          enabled: true
+        platform:
+          os: Linux
+          arch: Amd64
+        runtime:
+          type: Docker
+          spec: {}
+        execution:
+          steps:
+          - step:
+              type: Background
+              name: python server
+              identifier: python_server
+              spec:
+                connectorRef: dockerconnector
+                image: sxavramidis/python-pipeline-samples
+                shell: Sh
+                command: python3 /python-pipeline-samples/app.py
+                portBindings:
+                  "5000": "5000"

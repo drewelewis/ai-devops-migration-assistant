@@ -115,9 +115,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  harness:
+  # Harness Open Source 
+  # https://developer.harness.io/docs/open-source
+  # https://github.com/harness/harness
+  harness-opensource:
     image: harness/harness:latest
-    container_name: langgraph_harness
+    container_name: langgraph_harness_opensource
     environment:
       GITNESS_DATABASE_DRIVER: postgres
       GITNESS_DATABASE_DATASOURCE: host=postgres port=5432 sslmode=disable dbname=harness user=harness password=harness
@@ -129,6 +132,45 @@ services:
       - /tmp/harness:/data
     depends_on:
       - postgres
+
+  # Create an Harness Account - https://app.harness.io
+  # https://developer.harness.io/docs/platform/get-started/onboarding-guide
+  
+  # Harness Runner
+  # https://developer.harness.io/docs/continuous-integration/use-ci/set-up-build-infrastructure/define-a-docker-build-infrastructure/#install-the-harness-docker-runner
+  harness-runner:
+    build:      
+      context: ./harness
+      dockerfile: Dockerfile
+    container_name: langgraph_harness_runner
+    image: langgraph_harness_runner:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "3000:3000"
+
+  # Harness Delegate
+  # https://developer.harness.io/docs/continuous-integration/use-ci/set-up-build-infrastructure/define-a-docker-build-infrastructure/#install-the-delegate
+  harness-delegate:
+    image: us-docker.pkg.dev/gar-prod-setup/harness-public/harness/delegate:25.06.86100
+    network_mode: host
+    container_name: langgraph_harness_delegate
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2g
+    environment:
+      - DELEGATE_NAME=langgraph_harness_delegate
+      - NEXT_GEN=true
+      - DELEGATE_TYPE=DOCKER
+      - ACCOUNT_ID=${HARNESS_ACCOUNT_ID}
+      - DELEGATE_TOKEN=${HARNESS_DELEGATE_TOKEN}
+      - DELEGATE_TAGS=linux-amd64
+      - RUNNER_URL=http://host.docker.internal:3000
+      - MANAGER_HOST_AND_PORT=https://app.harness.io
+    depends_on:
+      - harness-runner
 
 volumes:
   postgres_data:

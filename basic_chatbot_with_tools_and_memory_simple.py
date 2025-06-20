@@ -20,7 +20,8 @@ from utils.langgraph_utils import save_graph
 from dotenv import load_dotenv
 
 from tools.tekton_tools import TektonTools
-from tools.teamcity_tools import TeamCityTools    
+from tools.teamcity_tools import TeamCityTools
+from tools.harness_tools import HarnessTools
 
 load_dotenv(override=True)
 current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -54,8 +55,9 @@ llm  = AzureChatOpenAI(
 
 teamcity_tools = TeamCityTools()
 tekton_tools = TektonTools()
+harness_tools = HarnessTools()
 
-tools= teamcity_tools.tools + tekton_tools.tools 
+tools = teamcity_tools.tools + tekton_tools.tools 
 llm_with_tools = llm.bind_tools(tools)
 
 # Define Nodes
