@@ -39,6 +39,13 @@ class HarnessOperations:
         """
         List pipelines using the harness_python_sdk PipelineApi.
         All parameters except the first three are optional.
+        Args:
+            account_identifier (str): The account identifier.
+            org_identifier (str): The organization identifier.
+            project_identifier (str): The project identifier.
+            body (dict, optional): The pipeline definition in YAML format. Defaults to None.
+            page (int, optional): Page number for pagination. Defaults to 0.
+            size (int, optional): Number of items per page. Defaults to 25.
         """
         try:
             api_response = self.pipeline_api.get_pipeline_list(
@@ -53,3 +60,45 @@ class HarnessOperations:
         except ApiException as e:            
             self.logger.error(f"Exception getting pipeline list: {e}")
             
+    def create_pipeline(
+        self,
+        body,
+        account_identifier,
+        org_identifier,
+        project_identifier        
+    ):
+        """
+        Create a new pipeline using the harness_python_sdk PipelineApi.      
+        Args:
+            account_identifier (str): The account identifier.
+            org_identifier (str): The organization identifier.
+            project_identifier (str): The project identifier.
+            body (dict): The pipeline definition in YAML format to create the pipeline.            
+        """
+        try:
+            api_response = self.pipeline_api.post_pipeline(
+                body,
+                account_identifier,
+                org_identifier,
+                project_identifier                
+            )
+            return api_response
+        except ApiException as e:
+            self.logger.error(f"Exception creating pipeline: {e}")
+
+            
+    def get_pipeline(self, account_identifier, org_identifier, project_identifier, pipeline_identifier):
+        """
+        Fetch a specific pipeline by its identifier using the harness_python_sdk PipelineApi.
+        Args:
+            account_identifier (str): The account identifier.
+            org_identifier (str): The organization identifier.
+            project_identifier (str): The project identifier.
+            pipeline_identifier (str): The pipeline identifier to fetch.        
+        """
+        try:
+            # Fetch a Pipeline
+            api_response = self.pipeline_api.get_pipeline(account_identifier, org_identifier, project_identifier, pipeline_identifier)
+            return api_response
+        except ApiException as e:
+            self.logger.error(f"Exception getting pipeline: {e}")
